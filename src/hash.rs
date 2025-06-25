@@ -1,34 +1,63 @@
 use std::process;
+use crate::error::Error;
 
-use sha2::{Digest, Sha256};
+use sha2::{Digest, Sha256, Sha512};
 
-pub struct Error {
-    message: String,
+// Types of hashes this program can process.
+pub enum HashType {
+	SHA256,
+	SHA512,
 }
 
-impl Error {
-    fn init(message: &str) -> Error {
-        Error {
-            message: message.to_string(),
-        }
-    }
+impl HashType {
+	const SHA256_FLAG: &str = "--SHA256";
+	const SHA512_FLAG: &str = "--SHA512";
+	
+	pub fn to_str(&self) -> &str {
+		match self {
+			Self::SHA256 => HashType::SHA256_FLAG,
+			Self::SHA512 => HashType::SHA512_FLAG,
+		}
+	}
 
-    pub fn to_string(&self) -> String {
-        self.message.clone()
-    }
+	pub fn from_str(flag: &str) -> Option<HashType> {
+		match flag {
+			HashType::SHA256_FLAG => Some(HashType::SHA256),
+			HashType::SHA512_FLAG => Some(HashType::SHA512),
+			_ => None
+		}
+	}
 }
 
-pub fn get_hash(file_name: String) -> Result<[u8; 32], Error> {
-    let file = match std::fs::read(file_name) {
+// Open file, read contents into Vector<u8>.
+// Exit program if there is an Error opening the file.
+fn file_to_bytes(file_name: String) -> Vec<u8> {
+	match std::fs::read(file_name) {
         Ok(file) => file,
         Err(e) => {
             let message = format!("unable to open file: {}", e.to_string());
             Error::init(&message);
             process::exit(-1);
         }
-    };
+	}
+}
 
-    let mut hasher = Sha256::new();
-    hasher.update(file);
-    Ok(hasher.finalize().into())
+// Return the hash of a file. 
+pub fn get_hash(hash_type: HashType, file_name: String) -> Result<Vec<u8>, Error> {
+    let file = file_to_bytes(file_name);
+
+	match hash_type {
+		HashType::SHA256 => {
+			let mut hasher = Sha256::new();
+			hasher.update(file);
+			let hash: [u8; 32] = hasher.finalize().into();
+			return Ok(hash.to_vec())
+		},
+		HashType::SHA512 => {
+			let mut hasher = Sha512::new();
+			hasher.update(file);
+			let hash: [u8; 64] = hasher.finalize().into();
+			return Ok(hash.to_vec())
+		}
+	}
 }
