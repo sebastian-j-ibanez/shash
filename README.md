@@ -7,5 +7,10 @@ A CLI utility to [s]how file [hash]es.
 Supports SHA256 and SHA512.
 
 ## Usage
+```
+Usage: shash.exe [flag] [file]
 
-`shash --[SHA256|SHA512] <file>`
+Flags:
+    -sha256    Get SHA256 hash of file.
+    -sha512    Get SHA512 hash of file.
+```
