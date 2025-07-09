@@ -10,8 +10,8 @@ pub enum HashType {
 }
 
 impl HashType {
-	const SHA256_FLAG: &str = "--SHA256";
-	const SHA512_FLAG: &str = "--SHA512";
+	const SHA256_FLAG: &str = "-sha256";
+	const SHA512_FLAG: &str = "-sha512";
 	
 	pub fn to_str(&self) -> &str {
 		match self {

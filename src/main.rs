@@ -9,25 +9,29 @@ use hash::HashType;
 fn main() {
     let mut args = env::args();
     if args.len() <= 1 {
-        eprintln!("expected 1 argument, received 0");
+        print_usage();
         process::exit(-1);
     }
 
     args.next();
 
-    if let Some(first_arg) = args.next() {
-		let hash_flag = match HashType::from_str(first_arg.as_str()) {
+    if let Some(flag_arg) = args.next() {
+		let hash_flag = match HashType::from_str(flag_arg.as_str()) {
 			Some(h) => h,
 			None => {
-				eprintln!("expected '--SHA256' or '--SHA512' flag");
+				eprintln!(
+                    "invalid flag: {}",
+                    flag_arg.as_str()
+                );
+                print_usage();
 				process::exit(-1);
 			}
 		};
 
-		if let Some(second_arg) = args.next() {
-			match hash::get_hash(hash_flag, second_arg) {
+		if let Some(file_arg) = args.next() {
+			match hash::get_hash(hash_flag, file_arg) {
 				Ok(h) => {
-					println!("\n--{}--\n{}\n", &first_arg[2..], hex::encode(h));
+                    println!("{}", hex::encode(h));
 				}
 				Err(e) => {
 					eprintln!("error while processing hash: {}", e.to_string());
@@ -36,4 +40,11 @@ fn main() {
 			}
 		}
     };
+}
+
+fn print_usage() {
+    println!("Usage: shash.exe [flag] [file]\n");
+    println!("Flags:");
+    println!("    -sha256    Get SHA256 hash of file.");
+    println!("    -sha512    Get SHA512 hash of file.");
 }
