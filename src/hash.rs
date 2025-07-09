@@ -36,7 +36,7 @@ fn file_to_bytes(file_name: String) -> Vec<u8> {
         Ok(file) => file,
         Err(e) => {
             let message = format!("unable to open file: {}", e.to_string());
-            Error::init(&message);
+            eprintln!("{}", message);
             process::exit(-1);
         }
 	}
